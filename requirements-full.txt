@@ -10,9 +10,16 @@ requests
 ibm-watsonx-ai
 google-genai
 
+# ── Computer vision ───────────────────────────────────────────────────────────
+opencv-python-headless
+numpy
+scikit-learn
+ultralytics
+supervision
+
 # ── Video download ────────────────────────────────────────────────────────────
 yt-dlp
 gdown
 
-# ── CV/ML dependencies (torch, ultralytics, opencv, etc.) are in requirements-full.txt
-# ── Install requirements-full.txt locally for video extraction features ───────
+# ── Sports CV library (team classification — optional, app degrades gracefully) ──
+git+https://github.com/roboflow/sports.git

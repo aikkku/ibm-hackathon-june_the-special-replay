@@ -232,7 +232,10 @@ async def prewarm(req: PrewarmRequest):
     video_path = CLIPS_DIR / req.clip_name
     if not video_path.exists():
         raise HTTPException(404, detail=f"Clip '{req.clip_name}' not found")
-    from cv_pipeline import prewarm_classifier, _fitted_classifiers
+    try:
+        from cv_pipeline import prewarm_classifier, _fitted_classifiers
+    except ImportError:
+        raise HTTPException(503, detail="Video processing unavailable in this deployment (CV dependencies not installed)")
     if str(video_path) in _fitted_classifiers:
         return {"status": "cached"}
     loop = asyncio.get_event_loop()
@@ -266,8 +269,10 @@ def extract(req: ExtractRequest):
     video_path = CLIPS_DIR / req.clip_name
     if not video_path.exists():
         raise HTTPException(404, detail=f"Clip '{req.clip_name}' not found in {CLIPS_DIR}")
-
-    from cv_pipeline import extract_frame_state
+    try:
+        from cv_pipeline import extract_frame_state
+    except ImportError:
+        raise HTTPException(503, detail="Video processing unavailable in this deployment (CV dependencies not installed)")
     result = extract_frame_state(str(video_path), req.timestamp_ms)
     if "error" in result:
         raise HTTPException(422, detail=result["error"])
