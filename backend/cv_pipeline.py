@@ -25,13 +25,30 @@ REFEREE_CLASS_ID    = 3
 # ── Model cache ───────────────────────────────────────────────────────────────
 _models: dict = {}
 
+_MODEL_IDS = {
+    "ball":   "1isw4wx-MK9h9LMr36VvIWlJD6ppUvw7V",
+    "player": "17PXFNlx-jI7VjVo_vQnB1sONjRyvoB-q",
+    "pitch":  "1Ma5Kt86tgpdjCTKfum79YMgNnSjcoOyf",
+}
+
+def _ensure_model(name: str, path: "Path") -> None:
+    """Download model weight from Google Drive if not present."""
+    if path.exists():
+        return
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    file_id = _MODEL_IDS.get(name)
+    if not file_id:
+        raise FileNotFoundError(f"Unknown model '{name}' and no local file at {path}")
+    print(f"[cv] downloading {name} model (~130 MB)…")
+    import gdown
+    gdown.download(f"https://drive.google.com/uc?id={file_id}", str(path), quiet=False)
+
 def _get_model(name: str):
     if name in _models:
         return _models[name]
     from ultralytics import YOLO
     path = DATA_DIR / f"football-{name}-detection.pt"
-    if not path.exists():
-        raise FileNotFoundError(f"Model not found: {path}")
+    _ensure_model(name, path)
     _models[name] = YOLO(str(path))
     return _models[name]
 
