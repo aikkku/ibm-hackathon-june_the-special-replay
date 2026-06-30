@@ -1,0 +1,22 @@
+# ── Web framework ─────────────────────────────────────────────────────────────
+fastapi
+uvicorn[standard]
+python-dotenv
+python-multipart
+aiofiles
+requests
+
+# ── AI clients ────────────────────────────────────────────────────────────────
+ibm-watsonx-ai
+google-genai
+
+# ── Computer vision ───────────────────────────────────────────────────────────
+opencv-python-headless
+numpy
+scikit-learn
+ultralytics
+supervision
+
+# ── Video download ────────────────────────────────────────────────────────────
+yt-dlp
+gdown
