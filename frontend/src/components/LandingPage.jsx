@@ -578,12 +578,13 @@ export default function LandingPage({ onGoToApp, onGoToRules }) {
       }}>
 
         <div className="lp-video-wrap" aria-hidden="true">
-          <iframe
-            src="https://www.youtube.com/embed/HsSJT-lGa9s?autoplay=1&mute=1&loop=1&playlist=HsSJT-lGa9s&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&enablejsapi=1"
-            allow="autoplay; encrypted-media"
-            title="Background reel"
-            frameBorder="0"
-            tabIndex="-1"
+          <video
+            autoPlay
+            muted
+            loop
+            playsInline
+            tabIndex={-1}
+            src="/videos/bg.mp4"
           />
         </div>
 

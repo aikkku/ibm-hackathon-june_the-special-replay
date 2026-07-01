@@ -23,8 +23,6 @@ backend/data/*.pt
 backend/data/*.onnx
 
 # ── Uploaded / processed video clips ─────────────────────────────────────────
-backend/static/clips/
-*.mp4
 *.avi
 *.mov
 *.mkv
