@@ -164,6 +164,41 @@ def _resolve_gk_teams(players, players_team_id, goalkeepers, sv):
                      for g in gk_xy])
 
 
+# ── Color-based team classifier (KMeans fallback when sports lib unavailable) ─
+def _color_team_classify(frame, player_detections, sv) -> np.ndarray:
+    """
+    Cluster players into 2 teams by jersey color using KMeans.
+    Samples the central 50% of each crop (avoids pitch green at borders).
+    """
+    from sklearn.cluster import KMeans
+
+    crops = [sv.crop_image(frame, xyxy) for xyxy in player_detections.xyxy]
+    features = []
+    for crop in crops:
+        if crop is None or crop.size == 0:
+            features.append([128.0, 128.0, 128.0])
+            continue
+        h, w = crop.shape[:2]
+        y1, y2 = max(0, h // 4), min(h, 3 * h // 4)
+        x1, x2 = max(0, w // 4), min(w, 3 * w // 4)
+        jersey = crop[y1:y2, x1:x2]
+        if jersey.size == 0:
+            features.append([128.0, 128.0, 128.0])
+            continue
+        # Use HSV so color distance is perceptually meaningful
+        hsv = cv2.cvtColor(jersey, cv2.COLOR_BGR2HSV)
+        features.append(hsv.reshape(-1, 3).mean(axis=0).tolist())
+
+    features = np.array(features, dtype=np.float32)
+    try:
+        labels = KMeans(n_clusters=2, n_init=10, random_state=42).fit_predict(features)
+        print(f"[cv] color KMeans: team0={int((labels==0).sum())} team1={int((labels==1).sum())}")
+        return labels.astype(int)
+    except Exception as e:
+        print(f"[cv] color KMeans failed: {e}")
+        return np.zeros(len(crops), dtype=int)
+
+
 # ── Main extraction function ──────────────────────────────────────────────────
 def extract_frame_state(video_path: str, timestamp_ms: int) -> dict:
     """
@@ -296,7 +331,8 @@ def extract_frame_state(video_path: str, timestamp_ms: int) -> dict:
                 tc.fit(player_crops)
             player_teams = tc.predict(player_crops).astype(int)
         except Exception as e:
-            print(f"[cv] team classification failed: {e}")
+            print(f"[cv] TeamClassifier unavailable ({e}), using color KMeans fallback")
+            player_teams = _color_team_classify(frame, players, sv)
 
     gk_teams = _resolve_gk_teams(players, player_teams, goalkeepers, sv)
 
