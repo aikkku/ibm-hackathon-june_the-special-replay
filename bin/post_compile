@@ -1,21 +1,19 @@
 #!/usr/bin/env bash
-# Heroku passes BUILD_DIR as $1. Use the buildpack's own pip so packages
-# land in the right site-packages that the dyno's Python will find.
+# Heroku passes BUILD_DIR as $1.
 set -euo pipefail
 
 BUILD_DIR=${1:-/app}
 PIP="$BUILD_DIR/.heroku/python/bin/pip"
 
 echo "-----> Installing CPU-only PyTorch + CV deps"
+
 $PIP install torch torchvision \
   --index-url https://download.pytorch.org/whl/cpu \
   --quiet
 
-$PIP install \
-  opencv-python-headless \
-  scikit-learn \
-  ultralytics \
-  supervision \
-  --quiet
+$PIP install scikit-learn ultralytics supervision --quiet
+
+# ultralytics pulls in opencv-python (needs libGL) — override with headless version
+$PIP install opencv-python-headless --force-reinstall --quiet
 
 echo "-----> CV deps installed OK"
