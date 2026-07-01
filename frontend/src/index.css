@@ -189,7 +189,8 @@ body {
   pointer-events: none;
   overflow: hidden;
 }
-.lp-video-wrap iframe {
+.lp-video-wrap iframe,
+.lp-video-wrap video {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -198,6 +199,7 @@ body {
   height: max(56.25vw, 100%);
   transform: translate(-50%, -50%);
   border: none;
+  object-fit: cover;
 }
 
 /* Layered overlay: dark top/bottom, lighter middle */
