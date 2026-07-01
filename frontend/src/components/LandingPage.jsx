@@ -584,7 +584,7 @@ export default function LandingPage({ onGoToApp, onGoToRules }) {
             loop
             playsInline
             tabIndex={-1}
-            src="/videos/bg.mp4"
+            src={`${import.meta.env.BASE_URL}videos/bg.mp4`}
           />
         </div>
 
