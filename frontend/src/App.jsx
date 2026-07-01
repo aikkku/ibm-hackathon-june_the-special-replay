@@ -567,13 +567,28 @@ export default function App({ onBack, onGoToRules }) {
               }}>
                 Tactical View
               </h1>
-              <p style={{ fontSize: 12, color: 'rgba(244,243,238,0.38)', lineHeight: 1.5 }}>
-                {phase === 'idle'
-                  ? 'Extract the frame to map players onto the pitch'
-                  : phase === 'scanning'
-                  ? 'Detecting players in real-time…'
-                  : 'Drag players · assign actions · predict with IBM Granite'}
-              </p>
+              {phase === 'scanning' ? (
+                <div className="scan-loader">
+                  <div className="scan-loader-row">
+                    <span className="scan-loader-text">ANALYZING FRAME</span>
+                    <div className="scan-loader-dots">
+                      <div className="scan-loader-dot" />
+                      <div className="scan-loader-dot" />
+                      <div className="scan-loader-dot" />
+                    </div>
+                  </div>
+                  <div className="scan-loader-bar-track">
+                    <div className="scan-loader-bar-fill" />
+                  </div>
+                  <span className="scan-loader-phase">YOLO · HOMOGRAPHY · IBM GRANITE</span>
+                </div>
+              ) : (
+                <p style={{ fontSize: 12, color: 'rgba(244,243,238,0.38)', lineHeight: 1.5 }}>
+                  {phase === 'idle'
+                    ? 'Extract the frame to map players onto the pitch'
+                    : 'Drag players · assign actions · predict with IBM Granite'}
+                </p>
+              )}
             </div>
             {phase === 'done' && (
               <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
