@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# Install CV dependencies with CPU-only PyTorch to stay under Heroku's 1 GB slug limit.
+# This runs after `pip install -r requirements.txt` in the Python buildpack.
+
+set -euo pipefail
+
+echo "-----> Installing CPU-only PyTorch + CV deps"
+pip install \
+  torch torchvision \
+  --index-url https://download.pytorch.org/whl/cpu \
+  --quiet
+
+pip install \
+  opencv-python-headless \
+  scikit-learn \
+  ultralytics \
+  supervision \
+  --quiet
+
+echo "-----> CV deps installed"
