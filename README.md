@@ -1,8 +1,16 @@
-# PitchIQ — The Special Replay
+<div align="center">
 
-**AI-powered football tactical analysis for the IBM SkillsBuild AI Builders Challenge**
+# ⚽ PitchIQ — The Special Replay
 
-PitchIQ lets you freeze any moment in a football match, extract every player's position with computer vision, then ask IBM Granite what happens next — all in a real-time 2D pitch view.
+### AI-powered football tactical analysis
+
+[![Live Demo](https://img.shields.io/badge/🚀%20Live%20Demo-pitchiq-6f42c1?style=for-the-badge)](https://aikkku.github.io/ibm-hackathon-june_the-special-replay/)
+[![Backend](https://img.shields.io/badge/API-Heroku-430098?style=for-the-badge&logo=heroku)](https://pitchiq-backend-40c23bb2a924.herokuapp.com/health)
+[![IBM Granite](https://img.shields.io/badge/AI-IBM%20Granite-052FAD?style=for-the-badge&logo=ibm)](https://www.ibm.com/watsonx)
+
+> Freeze any football moment · Extract every player with CV · Ask IBM Granite what happens next
+
+</div>
 
 ---
 
