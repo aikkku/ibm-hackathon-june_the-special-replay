@@ -37,6 +37,19 @@ export default function App({ onBack, onGoToRules }) {
   // ── Extraction error (shown in panel; null when no error) ────────────
   const [extractError, setExtractError] = useState(null);
 
+  // ── Slow-server toast (shown after 10s of scanning) ──────────────────
+  const [slowToast, setSlowToast] = useState(false);
+  const slowToastTimer = useRef(null);
+  useEffect(() => {
+    if (phase === 'scanning') {
+      slowToastTimer.current = setTimeout(() => setSlowToast(true), 10000);
+    } else {
+      clearTimeout(slowToastTimer.current);
+      setSlowToast(false);
+    }
+    return () => clearTimeout(slowToastTimer.current);
+  }, [phase]);
+
   // ── Radar image from sports library (ground-truth pitch view) ────────
   const [radarImage, setRadarImage] = useState(null);
 
@@ -462,6 +475,33 @@ export default function App({ onBack, onGoToRules }) {
 
   return (
     <div className="app-dark" style={{ minHeight: '100vh', background: '#0b0b0e' }}>
+
+      {/* ── Slow-server toast ── */}
+      {slowToast && (
+        <div style={{
+          position: 'fixed', bottom: 28, left: '50%', transform: 'translateX(-50%)',
+          zIndex: 9999,
+          background: 'rgba(18,18,24,0.96)',
+          border: '1px solid rgba(162,89,255,0.35)',
+          borderRadius: 14,
+          padding: '12px 20px',
+          display: 'flex', alignItems: 'center', gap: 12,
+          boxShadow: '0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(162,89,255,0.1)',
+          backdropFilter: 'blur(12px)',
+          animation: 'boxReveal 0.35s ease',
+          whiteSpace: 'nowrap',
+        }}>
+          <span style={{ fontSize: 18 }}>⏳</span>
+          <div>
+            <div style={{ fontSize: 12, fontWeight: 700, color: '#a259ff', fontFamily: 'var(--font-head)', letterSpacing: '0.06em' }}>
+              HANG TIGHT
+            </div>
+            <div style={{ fontSize: 11, color: 'rgba(244,243,238,0.5)', marginTop: 2 }}>
+              Server is warming up YOLO models — first scan takes ~60s
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Header ── */}
       <header style={{
