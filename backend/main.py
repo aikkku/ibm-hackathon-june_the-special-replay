@@ -193,10 +193,21 @@ def _do_yt_download(job_id: str, url: str):
 @app.get("/health")
 def health():
     import granite_client as gc
+    cv_status = "unknown"
+    cv_error  = None
+    try:
+        import cv2
+        import ultralytics
+        cv_status = f"ok (cv2 {cv2.__version__})"
+    except Exception as e:
+        cv_status = "unavailable"
+        cv_error  = str(e)
     return {
         "status": "ok",
         "ai_backend": gc.active_backend(),
         "granite_error": gc._granite_error,
+        "cv_status": cv_status,
+        "cv_error":  cv_error,
     }
 
 
