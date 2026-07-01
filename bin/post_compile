@@ -16,4 +16,8 @@ $PIP install scikit-learn ultralytics supervision --quiet
 # ultralytics pulls in opencv-python (needs libGL) — override with headless version
 $PIP install opencv-python-headless --force-reinstall --quiet
 
+# sports library for pitch config/homography/annotators — no-deps skips
+# the heavy transformers/umap stack (TeamClassifier already optional in cv_pipeline)
+$PIP install "git+https://github.com/roboflow/sports.git" --no-deps --quiet
+
 echo "-----> CV deps installed OK"
