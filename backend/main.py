@@ -20,6 +20,7 @@ from typing import Optional
 
 _prewarm_executor  = ThreadPoolExecutor(max_workers=1, thread_name_prefix="prewarm")
 _download_executor = ThreadPoolExecutor(max_workers=2, thread_name_prefix="yt-dlp")
+_extract_executor  = ThreadPoolExecutor(max_workers=1, thread_name_prefix="extract")
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -275,19 +276,42 @@ def upload_status(job_id: str):
     return job
 
 
-@app.post("/extract")
-def extract(req: ExtractRequest):
-    video_path = CLIPS_DIR / req.clip_name
-    if not video_path.exists():
-        raise HTTPException(404, detail=f"Clip '{req.clip_name}' not found in {CLIPS_DIR}")
+_extract_jobs: dict = {}
+
+def _do_extract(job_id: str, video_path: str, timestamp_ms: int):
+    _extract_jobs[job_id] = {"status": "processing"}
     try:
         from cv_pipeline import extract_frame_state
     except ImportError:
-        raise HTTPException(503, detail="Video processing unavailable in this deployment (CV dependencies not installed)")
-    result = extract_frame_state(str(video_path), req.timestamp_ms)
-    if "error" in result:
-        raise HTTPException(422, detail=result["error"])
-    return result
+        _extract_jobs[job_id] = {"status": "error", "error": "Video processing unavailable in this deployment (CV dependencies not installed)"}
+        return
+    try:
+        result = extract_frame_state(video_path, timestamp_ms)
+        if "error" in result:
+            _extract_jobs[job_id] = {"status": "error", "error": result["error"]}
+        else:
+            _extract_jobs[job_id] = {"status": "done", "result": result}
+    except Exception as e:
+        _extract_jobs[job_id] = {"status": "error", "error": str(e)}
+
+
+@app.post("/extract")
+async def extract(req: ExtractRequest):
+    video_path = CLIPS_DIR / req.clip_name
+    if not video_path.exists():
+        raise HTTPException(404, detail=f"Clip '{req.clip_name}' not found in {CLIPS_DIR}")
+    job_id = str(uuid.uuid4())[:8]
+    loop = asyncio.get_event_loop()
+    loop.run_in_executor(_extract_executor, _do_extract, job_id, str(video_path), req.timestamp_ms)
+    return {"job_id": job_id, "status": "processing"}
+
+
+@app.get("/extract/status/{job_id}")
+def extract_status(job_id: str):
+    job = _extract_jobs.get(job_id)
+    if job is None:
+        raise HTTPException(404, detail="Job not found")
+    return job
 
 
 @app.post("/predict")

@@ -22,6 +22,7 @@ export async function prewarmClip(clipName) {
 }
 
 export async function extractFrame(clipName, timestampMs) {
+  // Start background job (returns immediately — avoids Heroku's 30s H12 timeout)
   const res = await fetch(`${API}/extract`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -31,7 +32,18 @@ export async function extractFrame(clipName, timestampMs) {
     const err = await res.json().catch(() => ({ detail: res.statusText }));
     throw new Error(err.detail || 'Extraction failed');
   }
-  return res.json();
+  const { job_id } = await res.json();
+
+  // Poll every 2 seconds until done (max 3 minutes)
+  for (let i = 0; i < 90; i++) {
+    await new Promise(r => setTimeout(r, 2000));
+    const poll = await fetch(`${API}/extract/status/${job_id}`);
+    if (!poll.ok) throw new Error('Extraction status check failed');
+    const job = await poll.json();
+    if (job.status === 'done') return job.result;
+    if (job.status === 'error') throw new Error(job.error || 'Extraction failed');
+  }
+  throw new Error('Extraction timed out after 3 minutes');
 }
 
 export async function startYoutubeDownload(url) {
